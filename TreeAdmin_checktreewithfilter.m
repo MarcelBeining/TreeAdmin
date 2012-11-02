@@ -10,6 +10,8 @@ HFS = {'yes','no'};
 HFS(~[filter.HFS_pos,filter.HFS_neg]) = [];
 arc = {'positive','negative'};
 arc(~[filter.arc_pos,filter.arc_neg]) = [];
+done = {'yes','no'};
+done(~[filter.done_yes,filter.done_no]) = [];
 
 if filter.dpi_ok && (isempty(tree.dpi) || ~(tree.dpi >= filter.dpi_min && tree.dpi  <= filter.dpi_max))
     return
@@ -25,6 +27,16 @@ end
 %             return
 %         end
 % end
+switch numel(done)
+    case 1
+        if isempty(tree.done) || ~any(strcmp(tree.done,done))
+            return
+        end
+    case 2
+        if isempty(tree.done)
+            return
+        end
+end
 
 switch numel(HFS)
     case 1

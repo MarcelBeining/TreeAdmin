@@ -22,7 +22,7 @@ function varargout = TreeAdmin(varargin)
 
 % Edit the above text to modify the response to help TreeAdmin
 
-% Last Modified by GUIDE v2.5 01-Nov-2012 13:20:47
+% Last Modified by GUIDE v2.5 02-Nov-2012 15:46:02
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -70,6 +70,8 @@ handles.filter.dpi_max = 300;
 handles.filter.completeness_ok = false;
 handles.filter.completeness_min = 0;
 handles.filter.completeness_max = 100;
+handles.filter.done_yes = 0;
+handles.filter.done_no = 0;
 handles.filter.HFS_pos = 0;
 handles.filter.HFS_neg = 0;
 handles.filter.ipsi = 0;
@@ -235,11 +237,9 @@ switch mode
         if iscell(all_tree_file_names)
             for f = 1:numel(all_tree_file_names)
                 handles.admin.all_tree_file_names(f).name = all_tree_file_names{f};
-                handles.admin.all_tree_file_names(f).changed = false;
             end
         else
             handles.admin.all_tree_file_names.name = all_tree_file_names;
-            handles.admin.all_tree_file_names.changed = false;
         end
     case 2
         handles.admin.curr_dir = uigetdir(handles.admin.curr_dir,'Choose the directory which comprises the tree files');
@@ -292,18 +292,22 @@ function uipushsave_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 w = waitbar(0,'Saving Trees');
 for f = 1:numel(handles.admin.all_tree_file_names)
-    if handles.admin.all_tree_file_names(f).changed
-       answer = questdlg('Trees have been deleted. Overwrite original file nonetheless?','Overwrite Warning','No');
-       if ~strcmp(answer,'Yes')
+    treeref = handles.admin.all_tree_file_names(f).treeref;
+    waitbar(f/numel(handles.admin.all_tree_file_names),w)
+    if any(handles.admin.deleted_trees(treeref))
+       answer = questdlg(sprintf('Trees of file "%s" have been deleted.\n Overwrite file nonetheless?',handles.admin.all_tree_file_names(f).name),'Overwrite Warning','No');
+       if any(strcmp(answer,{'','Cancel'}))
+           break
+       elseif strcmp(answer,'No')
            continue
        end
     end
-    curr_file = {handles.admin.all_trees(handles.admin.all_tree_file_names(f).treeref)};
+    treeref(handles.admin.deleted_trees(treeref))=[];
+    curr_file = {handles.admin.all_trees(treeref)};
     if numel(curr_file{1}) == 1
        curr_file = curr_file{1}; 
     end
     save_tree(curr_file,fullfile(handles.admin.curr_dir,handles.admin.all_tree_file_names(f).name));
-    waitbar(numel(handles.admin.all_tree_file_names)/f,w)
 end
 close(w)
 
@@ -594,10 +598,15 @@ if strcmp(get(hObject,'Enable'),'on') && ~isempty(get(hObject,'String'))
     new_name = new_name(~cellfun(@strcmp,old_name,new_name)); % leaves out unchanged names
     for n = 1:numel(new_name)
         rename_these = find(cellfun(@(x) strcmp(x.animal,old_name(n)),handles.admin.all_trees));
-        for t = 1:numel(rename_these)
-            handles.admin.all_trees{rename_these(t)}.animal = new_name{n};
+        if isempty(new_name{n})
+            handles.admin.deleted_trees(rename_these) = true;
+        else
+            for t = 1:numel(rename_these)
+                handles.admin.all_trees{rename_these(t)}.animal = new_name{n};
+            end
         end
     end
+    handles.filter.changed = 1;
     handles.filter.selected_trees = 1;
     set(handles.Trees,'Value',1)
     set(handles.Animal,'Value',1)
@@ -617,11 +626,9 @@ if ~isempty(get(handles.Trees,'String'))
     for t = 1:numel(new_name)
         if isempty(new_name{t})
             delete_this_ID(end+1) = handles.filter.filtered_tree_names{handles.filter.selected_trees(t),2};
-%             handles.filter.filtered_tree_names(handles.filter.selected_tr
-%             ees(t),:) = [];
-            delete_treeref = find(cellfun(@(x) any(x == delete_this_ID(end)),{handles.admin.all_tree_file_names.treeref}));
-            handles.admin.all_tree_file_names(delete_treeref).treeref = setdiff(handles.admin.all_tree_file_names(delete_treeref).treeref,delete_this_ID(end));
-            handles.admin.all_tree_file_names(delete_treeref).changed = true;
+%             delete_treeref = find(cellfun(@(x) any(x == delete_this_ID(end)),{handles.admin.all_tree_file_names.treeref}));
+%             handles.admin.all_tree_file_names(delete_treeref).treeref = setdiff(handles.admin.all_tree_file_names(delete_treeref).treeref,delete_this_ID(end));
+%             handles.admin.all_tree_file_names(delete_treeref).changed = true;
         else
             handles.admin.all_trees{handles.filter.filtered_tree_names{handles.filter.selected_trees(t),2}}.name = new_name{t};
         end
@@ -739,6 +746,25 @@ handles.admin.locktreelist_ok = get(hObject,'Value');
 set(hObject,'ForegroundColor',[handles.admin.locktreelist_ok 0 0])
 s = {'on','off'};
 set(handles.Animal,'Enable',s{handles.admin.locktreelist_ok+1})
+TreeAdmin_UpdateGUI(handles);
+
+
+% --- Executes on button press in done_no.
+function done_no_Callback(hObject, eventdata, handles)
+% hObject    handle to done_no (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.filter.done_no = get(hObject,'Value');
+handles.filter.changed = 1;
+TreeAdmin_UpdateGUI(handles);
+
+% --- Executes on button press in done_yes.
+function done_yes_Callback(hObject, eventdata, handles)
+% hObject    handle to done_yes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.filter.done_yes = get(hObject,'Value');
+handles.filter.changed = 1;
 TreeAdmin_UpdateGUI(handles);
 
 
