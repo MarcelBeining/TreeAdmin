@@ -15,7 +15,11 @@ if handles.filter.changed && ~handles.admin.locktreelist_ok
     handles.admin.filter = false(numel(handles.admin.all_trees),1);
     
     for t = 1: numel(handles.admin.all_trees)
-        handles.admin.filter(t) = TreeAdmin_checktreewithfilter(handles.admin.all_trees{t},handles.filter);
+        if handles.admin.deleted_trees(t)
+            handles.admin.filter(t) = false;
+        else
+            handles.admin.filter(t) = TreeAdmin_checktreewithfilter(handles.admin.all_trees{t},handles.filter);
+        end
     end
 end
 %     %% dpi check

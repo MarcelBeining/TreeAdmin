@@ -274,6 +274,7 @@ for f = 1:numel(handles.admin.all_tree_file_names)
     handles.admin.all_trees(end+1:end+numel(curr_file)) = curr_file;
 end
 
+handles.admin.deleted_trees = false(numel(handles.admin.all_trees),1);
 set(handles.Animal,'Value',1)
 set(handles.Trees,'Value',1)
 handles.admin.locktreelist_ok = false;
@@ -616,7 +617,8 @@ if ~isempty(get(handles.Trees,'String'))
     for t = 1:numel(new_name)
         if isempty(new_name{t})
             delete_this_ID(end+1) = handles.filter.filtered_tree_names{handles.filter.selected_trees(t),2};
-%             handles.filter.filtered_tree_names(handles.filter.selected_trees(t),:) = [];
+%             handles.filter.filtered_tree_names(handles.filter.selected_tr
+%             ees(t),:) = [];
             delete_treeref = find(cellfun(@(x) any(x == delete_this_ID(end)),{handles.admin.all_tree_file_names.treeref}));
             handles.admin.all_tree_file_names(delete_treeref).treeref = setdiff(handles.admin.all_tree_file_names(delete_treeref).treeref,delete_this_ID(end));
             handles.admin.all_tree_file_names(delete_treeref).changed = true;
@@ -625,7 +627,7 @@ if ~isempty(get(handles.Trees,'String'))
         end
     end
     if ~isempty(delete_this_ID)
-       handles.admin.all_trees(delete_this_ID) = [];
+       handles.admin.deleted_trees(delete_this_ID) = true;
        handles.filter.changed = 1;
     end
     TreeAdmin_UpdateGUI(handles);
