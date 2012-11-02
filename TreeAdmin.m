@@ -277,6 +277,7 @@ end
 handles.admin.deleted_trees = false(numel(handles.admin.all_trees),1);
 set(handles.Animal,'Value',1)
 set(handles.Trees,'Value',1)
+set(handles.n_sel_trees,'String','1 tree(s) selected')
 handles.admin.locktreelist_ok = false;
 set(handles.Lock_ok,'Value',0)
 set(handles.Lock_ok,'ForegroundColor',[0 0 0])
@@ -509,6 +510,7 @@ if ~handles.admin.key_pressed
     if handles.filter.selected_animals ~= get(hObject,'Value')
         handles.filter.selected_trees = 1;
         set(handles.Trees,'Value',1)
+        set(handles.n_sel_trees,'String','1 tree(s) selected')
     end
     handles.filter.selected_animals = get(hObject,'Value');
     TreeAdmin_UpdateGUI(handles);
@@ -522,6 +524,7 @@ function Trees_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if ~handles.admin.key_pressed
     handles.filter.selected_trees = get(hObject,'Value');
+    set(handles.n_sel_trees,'String',sprintf('%d tree(s) selected',numel(handles.filter.selected_trees)))
     TreeAdmin_UpdateGUI(handles);
 end
 
@@ -591,6 +594,7 @@ function Animal_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if strcmp(get(hObject,'Enable'),'on') && ~isempty(get(hObject,'String'))
     old_name = handles.filter.filtered_animals(handles.filter.selected_animals);
+%     old_name{cellfun(@(x) strcmp(x,'Unknown'),old_name)} = '';
     new_name = inputdlg(repmat({'New Name:'},[numel(handles.filter.selected_animals) 1]),'Rename animal',1,old_name)';
     if isempty(new_name)
         return
@@ -609,6 +613,7 @@ if strcmp(get(hObject,'Enable'),'on') && ~isempty(get(hObject,'String'))
     handles.filter.changed = 1;
     handles.filter.selected_trees = 1;
     set(handles.Trees,'Value',1)
+    set(handles.n_sel_trees,'String','1 tree(s) selected')
     set(handles.Animal,'Value',1)
     TreeAdmin_UpdateGUI(handles);
 end

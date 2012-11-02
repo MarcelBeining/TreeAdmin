@@ -113,6 +113,7 @@ if sum(handles.admin.filter) == 0
     handles.admin.filtered_trees = handles.admin.filter;
     set(handles.Details,'Data',{})
     set(handles.Details,'Enable','off')
+    set(handles.n_sel_trees,'String','')
 elseif ~handles.admin.locktreelist_ok
     handles.filter.filtered_animals = unique(cellfun(@(x) num2str(x.animal),handles.admin.all_trees(handles.admin.filter),'UniformOutput',0));
     liststring = handles.filter.filtered_animals;
@@ -139,6 +140,7 @@ end
 if ~handles.admin.locktreelist_ok && (~exist('liststring','var') || numel(get(handles.Animal,'String')) ~= numel(liststring) || ~all(strcmp(get(handles.Animal,'String'),liststring')) || any(size(handles.filter.filtered_tree_names,1) < handles.filter.selected_trees))
     handles.filter.selected_trees = 1;
     set(handles.Trees,'Value',1)
+    set(handles.n_sel_trees,'String','1 tree(s) selected')
 end
 if sum(handles.admin.filter) ~= 0
     selected_tree_names = handles.filter.filtered_tree_names(handles.filter.selected_trees,1);
