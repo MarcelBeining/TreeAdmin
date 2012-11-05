@@ -22,7 +22,7 @@ function varargout = TreeAdmin(varargin)
 
 % Edit the above text to modify the response to help TreeAdmin
 
-% Last Modified by GUIDE v2.5 02-Nov-2012 15:46:02
+% Last Modified by GUIDE v2.5 05-Nov-2012 15:39:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -97,6 +97,8 @@ set(handles.Details,'ColumnEditable',true(1,numel(handles.admin.tags(1,:))))
 set(handles.Details,'Data',{})
 set(handles.Details,'Enable','off')
 handles.admin.selected_detail = [];
+
+handles.admin.stat_trees = cell(0,2);
 
 handles.admin.locktreelist_ok = false;
 handles.admin.preview_ok = true;
@@ -223,7 +225,17 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+% --- Executes during object creation, after setting all properties.
+function Stat_Trees_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Stat_Trees (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 % --------------------------------------------------------------------
 function uipushopen_ClickedCallback(hObject, eventdata, handles,mode)
@@ -273,6 +285,9 @@ for f = 1:numel(handles.admin.all_tree_file_names)
     %     curr_file = curr_file(cellfun(@(x)  numel(x.X),curr_file)>10);  % sort out uncompleted trees
     handles.admin.all_trees(end+1:end+numel(curr_file)) = curr_file;
 end
+
+handles.admin.stat_trees = cell(0,2);
+TreeAdmin_UpdateStats(handles);
 
 handles.admin.deleted_trees = false(numel(handles.admin.all_trees),1);
 set(handles.Animal,'Value',1)
@@ -773,3 +788,44 @@ handles.filter.changed = 1;
 TreeAdmin_UpdateGUI(handles);
 
 
+% --- Executes on selection change in Stat_Trees.
+function Stat_Trees_Callback(hObject, eventdata, handles)
+% hObject    handle to Stat_Trees (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns Stat_Trees contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from Stat_Trees
+
+
+% --- Executes on button press in Start_Stats.
+function Start_Stats_Callback(hObject, eventdata, handles)
+% hObject    handle to Start_Stats (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+figure;
+stats_tree (handles.admin.stat_trees(:,1), handles.admin.stat_trees(:,2))
+
+
+% --- Executes on button press in Add_Stat_Trees.
+function Add_Stat_Trees_Callback(hObject, eventdata, handles)
+% hObject    handle to Add_Stat_Trees (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+answer = inputdlg('Please give name for selected tree group','Adding Tree Group for Statistics');
+if ~isempty(answer)
+    handles.admin.stat_trees{end+1,1} = handles.admin.all_trees(cat(1,handles.filter.filtered_tree_names{handles.filter.selected_trees,2}));
+    handles.admin.stat_trees{end,2} = answer{1};
+end
+TreeAdmin_UpdateStats(handles);
+guidata(handles.TreeAdmin,handles);
+
+% --- Executes on button press in Del_Stat_Trees.
+function Del_Stat_Trees_Callback(hObject, eventdata, handles)
+% hObject    handle to Del_Stat_Trees (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+del_this_group = get(handles.Stat_Trees,'Value');
+handles.admin.stat_trees(del_this_group,:) = [];
+TreeAdmin_UpdateStats(handles);
+guidata(handles.TreeAdmin,handles);
