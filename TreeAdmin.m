@@ -267,11 +267,17 @@ end
 % if numel(handles.admin.all_tree_file_names) == 0
 
 handles.admin.all_trees = cell(0);
+wrong_file = 0;
 % names = cell(0);
 for f = 1:numel(handles.admin.all_tree_file_names)
     curr_file = load_tree(fullfile(handles.admin.curr_dir,handles.admin.all_tree_file_names(f).name));
-    if iscell(curr_file) && numel(curr_file) == 1 && iscell(curr_file{1})
-        curr_file = curr_file{1};
+    if iscell(curr_file) && iscell(curr_file{1})
+        if numel(curr_file) == 1
+            curr_file = curr_file{1};
+        else
+            wrong_file = wrong_file +1;
+            continue
+        end
     end
     handles.admin.all_tree_file_names(f).treeref = (1:numel(curr_file))+numel(handles.admin.all_trees);
     for tree = 1:numel(curr_file)
@@ -286,6 +292,9 @@ for f = 1:numel(handles.admin.all_tree_file_names)
     handles.admin.all_trees(end+1:end+numel(curr_file)) = curr_file;
 end
 
+if wrong_file > 0
+   warndlg(sprintf('Warning: %d files could not be loaded because a file must only one tree group!',wrong_file),'Unsupported Files')
+end
 handles.admin.stat_trees = cell(0,2);
 TreeAdmin_UpdateStats(handles);
 
