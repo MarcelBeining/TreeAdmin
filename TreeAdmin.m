@@ -22,7 +22,7 @@ function varargout = TreeAdmin(varargin)
 
 % Edit the above text to modify the response to help TreeAdmin
 
-% Last Modified by GUIDE v2.5 05-Nov-2012 15:39:27
+% Last Modified by GUIDE v2.5 12-Feb-2013 14:22:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -246,6 +246,9 @@ switch mode
     case 1
         handles.admin.all_tree_file_names = [];
         [all_tree_file_names, handles.admin.curr_dir ] = uigetfile({'*.mtr','.mtr files (Treestoolbox)'},'Choose the tree file(s) you want to open',handles.admin.curr_dir,'MultiSelect','on');
+        if ~iscell(all_tree_file_names) && ~ischar(all_tree_file_names)
+            return
+        end
         if iscell(all_tree_file_names)
             for f = 1:numel(all_tree_file_names)
                 handles.admin.all_tree_file_names(f).name = all_tree_file_names{f};
@@ -812,8 +815,8 @@ function Start_Stats_Callback(hObject, eventdata, handles)
 % hObject    handle to Start_Stats (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-figure;
-stats_tree (handles.admin.stat_trees(:,1), handles.admin.stat_trees(:,2))
+TreeAdmin_Statistics(handles.admin.stat_trees(:,1), handles.admin.stat_trees(:,2))
+
 
 
 % --- Executes on button press in Add_Stat_Trees.
@@ -838,3 +841,30 @@ del_this_group = get(handles.Stat_Trees,'Value');
 handles.admin.stat_trees(del_this_group,:) = [];
 TreeAdmin_UpdateStats(handles);
 guidata(handles.TreeAdmin,handles);
+
+
+% --------------------------------------------------------------------
+function Rescale_Trees_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to Rescale_Trees (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+new_scale = inputdlg('Please enter new scale','Rescale Trees',1,{'[0.4112,0.4112,1.5]'});
+new_scale = str2num(new_scale{1});
+if numel(new_scale)~=3 || isempty(new_scale)
+    return
+end
+for i = 1: numel(handles.filter.selected_trees)
+    tree = handles.admin.all_trees{handles.filter.filtered_tree_names{handles.filter.selected_trees(i),2}};
+    fac = [new_scale(1)/tree.x_scale, new_scale(2)/tree.y_scale, new_scale(3)/tree.z_scale];
+    tree.x_scale = new_scale(1);
+    tree.y_scale = new_scale(2);
+    tree.z_scale = new_scale(3);
+    if fac(1) == fac(2)
+       tree = scale_tree(tree,fac(1)); 
+       fac = fac/fac(1);
+    end
+    handles.admin.all_trees{handles.filter.filtered_tree_names{handles.filter.selected_trees(i),2}} = resample_tree(scale_tree (tree, fac),1);
+end
+guidata(handles.TreeAdmin,handles);
+TreeAdmin_UpdateGUI(handles);
+
