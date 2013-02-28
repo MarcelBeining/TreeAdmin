@@ -120,6 +120,22 @@ title('Mean Branchpoint Angle [°]','FontSize',12,'FontWeight','bold')
 set(gca,'XLim',[0 100])
 ylabel('[%]')
 
+subplot(4,2,7)
+hold on
+plall = cell(2,1);
+angall = cell(2,1);
+for i=1:numel(treegroups)
+    for o=1:numel(treegroups{i})
+        pl = PL_tree(treegroups{i}{o});
+        plall{i} = cat(1,plall{i},pl(B_tree(treegroups{i}{o})));
+        ang = rad2deg(angleB_tree(treegroups{i}{o}));
+        angall{i} = cat(1,angall{i},ang(B_tree(treegroups{i}{o})));
+    end
+    plot(plall{i},angall{i},sprintf('%s.',col{i}));
+end
+xlabel('path length from soma [µm]')
+ylabel('branching angle [°]')
+legend(treenames)
 %%
 if numel(unique(cellfun(@numel,treegroups))) == 1
     figure(2)

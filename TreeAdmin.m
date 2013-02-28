@@ -859,10 +859,19 @@ for i = 1: numel(handles.filter.selected_trees)
     tree.x_scale = new_scale(1);
     tree.y_scale = new_scale(2);
     tree.z_scale = new_scale(3);
-    if fac(1) == fac(2)
+    ORI = [tree.X(1) tree.Y(1) tree.Z(1)];  %origin of tree
+    tree.X = tree.X -ORI(1);
+    tree.Y = tree.Y -ORI(2);
+    tree.Z = tree.Z -ORI(3);
+    ORI = ORI .* fac;           %translate origin to new xyz_scale
+    tree.X = tree.X +ORI(1);
+    tree.Y = tree.Y +ORI(2);
+    tree.Z = tree.Z +ORI(3);
+    if fac(1) == fac(2)     % if new x_scale = new y_scale do scale them separately to z
        tree = scale_tree(tree,fac(1)); 
        fac = fac/fac(1);
     end
+
     handles.admin.all_trees{handles.filter.filtered_tree_names{handles.filter.selected_trees(i),2}} = resample_tree(scale_tree (tree, fac),1);
 end
 guidata(handles.TreeAdmin,handles);
