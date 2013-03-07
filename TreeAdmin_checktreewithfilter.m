@@ -88,7 +88,7 @@ switch numel(arc)
             return
         end
     case 2
-        if isempty(tree.arc)
+        if isempty(tree.arc) || ~any(strcmp(tree.arc,arc))
             return
         end
 end
