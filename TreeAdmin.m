@@ -344,7 +344,7 @@ function uipushsavenew_ClickedCallback(hObject, eventdata, handles)
 % hObject    handle to uipushsavenew (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[curr_filename,curr_dir] = uiputfile({'*.mtr','.mtr files (Treestoolbox)'},'In order to save the selected trees, please choose a directory and a file name.','NewTreeFile');
+[curr_filename,curr_dir] = uiputfile({'*.mtr','.mtr files (Treestoolbox)'},'In order to save the selected trees, please choose a directory and a file name.',sprintf('%sNewTreeFile.mtr',handles.admin.curr_dir));
 w = waitbar(0,'Saving Trees');
 curr_file = {handles.admin.all_trees(cat(1,handles.filter.filtered_tree_names{handles.filter.selected_trees,2}))};
 if numel(curr_file{1}) == 1
