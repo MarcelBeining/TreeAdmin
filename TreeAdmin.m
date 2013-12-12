@@ -107,11 +107,31 @@ b=axes('position',[20 20 100 100],'visible','off');
 handles.admin.treecolors = colormap(b,'lines');
 delete(b)
 set(handles.TreeAdmin,'Position',[1,1,1200,650]);
+handles.varargin = false;
+if ~isempty(varargin)
+    if iscell(varargin{1}) && isstruct(varargin{1}{1})
+        handles.admin.all_trees = varargin{1};
+    elseif isstruct(varargin{1})
+        handles.admin.all_trees = varargin(1);
+    end
+    if isfield(handles.admin,'all_trees')
+        set(handles.uipushopen,'Enable','off')
+        set(handles.uipushopensingle,'Enable','off')
+        set(handles.uipushsave,'Enable','off')
+        set(handles.uipushsavenew,'Enable','off')
+        set(handles.Rescale_Trees,'Enable','off')
+        handles.filter.changed = 1;
+        handles.admin.deleted_trees = false(numel(handles.admin.all_trees),1);
+        handles.varargin = true;
+    end
+    
+end
 % Update handles structure
 guidata(hObject, handles);
+TreeAdmin_UpdateGUI(handles)
 
 % UIWAIT makes TreeAdmin wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -122,7 +142,10 @@ function varargout = TreeAdmin_OutputFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
-varargout{1} = handles.output;
+if handles.varargin && isfield(handles.admin,'all_trees')
+    varargout{1} = handles.admin.all_trees;
+end
+delete(handles.figure1);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -354,6 +377,9 @@ function uipushsavenew_ClickedCallback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [curr_filename,curr_dir] = uiputfile({'*.mtr','.mtr files (Treestoolbox)'},'In order to save the selected trees, please choose a directory and a file name.',sprintf('%sNewTreeFile.mtr',handles.admin.curr_dir));
+if cur_dir == 0
+    return
+end
 w = waitbar(0,'Saving Trees');
 curr_file = {handles.admin.all_trees(cat(1,handles.filter.filtered_tree_names{handles.filter.selected_trees,2}))};
 if numel(curr_file{1}) == 1
@@ -775,7 +801,14 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: delete(hObject) closes the figure
-delete(hObject);
+answer = questdlg('Do you really want to close TreeAdmin?','Quit TreeAdmin','No');
+if strcmp(answer,'Yes')
+    if strcmp(get(hObject,'waitstatus'),'waiting')
+        uiresume(hObject)
+    else
+        delete(hObject);
+    end
+end
 
 
 % --- Executes on button press in Lock_ok.
@@ -864,7 +897,7 @@ if numel(new_scale)~=3 || isempty(new_scale)
 end
 for i = 1: numel(handles.filter.selected_trees)
     tree = handles.admin.all_trees{handles.filter.filtered_tree_names{handles.filter.selected_trees(i),2}};
-    if isfield(tree,'x_scale')
+    if isfield(tree,'x_scale') && ~isempty(tree.x_scale)
         fac = [new_scale(1)/tree.x_scale, new_scale(2)/tree.y_scale, new_scale(3)/tree.z_scale];
     else
         fac = [new_scale(1), new_scale(2), new_scale(3)];
@@ -885,7 +918,7 @@ for i = 1: numel(handles.filter.selected_trees)
        fac = fac/fac(1);
     end
 
-    handles.admin.all_trees{handles.filter.filtered_tree_names{handles.filter.selected_trees(i),2}} = resample_tree(scale_tree (tree, fac),1);
+    handles.admin.all_trees{handles.filter.filtered_tree_names{handles.filter.selected_trees(i),2}} = resample_tree(scale_tree (tree, fac),1,'-d');
 end
 guidata(handles.TreeAdmin,handles);
 TreeAdmin_UpdateGUI(handles);
