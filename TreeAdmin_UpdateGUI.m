@@ -172,4 +172,7 @@ if handles.admin.preview_ok && exist('selected_trees','var')
 end
 
 %% Finish
+if get(handles.Legend_ok,'Value')
+    legend(handles.Preview,handles.filter.filtered_tree_names(handles.filter.selected_trees,1))
+end
 guidata(handles.TreeAdmin,handles)
