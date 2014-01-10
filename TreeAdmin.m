@@ -123,6 +123,13 @@ if ~isempty(varargin)
         handles.filter.changed = 1;
         handles.admin.deleted_trees = false(numel(handles.admin.all_trees),1);
         handles.varargin = true;
+        for tree = 1:numel(handles.admin.all_trees)
+            for tag = 1:numel(handles.admin.tags(1,:))
+                if ~isfield(handles.admin.all_trees{tree},handles.admin.tags{1,tag})
+                    handles.admin.all_trees{tree}.(handles.admin.tags{1,tag}) = handles.admin.tags{2,tag}([]);
+                end
+            end
+        end
     end
     
 end
@@ -377,7 +384,7 @@ function uipushsavenew_ClickedCallback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [curr_filename,curr_dir] = uiputfile({'*.mtr','.mtr files (Treestoolbox)'},'In order to save the selected trees, please choose a directory and a file name.',sprintf('%sNewTreeFile.mtr',handles.admin.curr_dir));
-if cur_dir == 0
+if curr_dir == 0
     return
 end
 w = waitbar(0,'Saving Trees');
