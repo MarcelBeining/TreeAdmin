@@ -5,6 +5,10 @@ if ~isfield(handles.admin,'all_trees')
     return
 end
 
+if numel(handles.admin.all_trees) > size(handles.admin.treecolors,1)
+    handles.admin.treecolors = repmat(handles.admin.treecolors,[ceil(numel(handles.admin.all_trees)/size(handles.admin.treecolors,1)),1]);
+end
+
 if handles.filter.changed && ~handles.admin.locktreelist_ok
     handles.filter.changed = false;
     
@@ -115,14 +119,24 @@ if sum(handles.admin.filter) == 0
     set(handles.Details,'Enable','off')
     set(handles.n_sel_trees,'String','')
 elseif ~handles.admin.locktreelist_ok
+    selanim = handles.filter.filtered_animals(handles.filter.selected_animals);
     handles.filter.filtered_animals = unique(cellfun(@(x) num2str(x.animal),handles.admin.all_trees(handles.admin.filter),'UniformOutput',0));
     liststring = handles.filter.filtered_animals;
     if any(cellfun(@isempty,liststring))
         liststring{cellfun(@isempty,liststring)} = 'Unknown';
     end
     set(handles.Animal,'String',liststring)
-    
-    if isempty(handles.filter.selected_animals) || ~all(get(handles.Animal,'Value') == handles.filter.selected_animals) || any(handles.filter.selected_animals > numel(handles.filter.filtered_animals))
+    selanimind = [];
+    for a = 1:numel(selanim)
+       ind = cellfun(@(x) strcmp(x,selanim{a}),handles.filter.filtered_animals); 
+       if sum(ind)==1
+          selanimind = cat(1,selanimind,find(ind)); 
+       end
+    end
+    if ~isempty(selanimind)
+        handles.filter.selected_animals = selanimind;
+        set(handles.Animal,'Value',selanimind)
+    elseif isempty(handles.filter.selected_animals) || ~all(get(handles.Animal,'Value') == handles.filter.selected_animals) || any(handles.filter.selected_animals > numel(handles.filter.filtered_animals))
         set(handles.Animal,'Value',1)
         handles.filter.selected_animals = 1;
     end

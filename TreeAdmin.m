@@ -119,7 +119,7 @@ if ~isempty(varargin)
         set(handles.uipushopensingle,'Enable','off')
         set(handles.uipushsave,'Enable','off')
         set(handles.uipushsavenew,'Enable','off')
-        set(handles.Rescale_Trees,'Enable','off')
+%         set(handles.Rescale_Trees,'Enable','off')
         handles.filter.changed = 1;
         handles.admin.deleted_trees = false(numel(handles.admin.all_trees),1);
         handles.varargin = true;
@@ -136,9 +136,11 @@ end
 % Update handles structure
 guidata(hObject, handles);
 TreeAdmin_UpdateGUI(handles)
-
+if ~isempty(varargin)
 % UIWAIT makes TreeAdmin wait for user response (see UIRESUME)
-uiwait(handles.figure1);
+    uiwait(handles.figure1);
+end
+
 
 
 % --- Outputs from this function are returned to the command line.
@@ -150,9 +152,10 @@ function varargout = TreeAdmin_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 if handles.varargin && isfield(handles.admin,'all_trees')
-    varargout{1} = handles.admin.all_trees;
+    varargout{1} = {handles.admin.all_trees};
+    delete(handles.figure1);
 end
-delete(handles.figure1);
+
 
 
 % --- Executes during object creation, after setting all properties.
@@ -576,7 +579,7 @@ function Animal_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if ~handles.admin.key_pressed
-    if handles.filter.selected_animals ~= get(hObject,'Value')
+    if numel(handles.filter.selected_animals) ~= numel(get(hObject,'Value')) || any(handles.filter.selected_animals ~= get(hObject,'Value'))
         handles.filter.selected_trees = 1;
         set(handles.Trees,'Value',1)
         set(handles.n_sel_trees,'String','1 tree(s) selected')
