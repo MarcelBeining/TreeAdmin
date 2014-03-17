@@ -119,7 +119,11 @@ if sum(handles.admin.filter) == 0
     set(handles.Details,'Enable','off')
     set(handles.n_sel_trees,'String','')
 elseif ~handles.admin.locktreelist_ok
-    selanim = handles.filter.filtered_animals(handles.filter.selected_animals);
+    if isfield(handles.filter,'filtered_animals')
+        selanim = handles.filter.filtered_animals(handles.filter.selected_animals);
+    else
+        selanim = {};
+    end
     handles.filter.filtered_animals = unique(cellfun(@(x) num2str(x.animal),handles.admin.all_trees(handles.admin.filter),'UniformOutput',0));
     liststring = handles.filter.filtered_animals;
     if any(cellfun(@isempty,liststring))

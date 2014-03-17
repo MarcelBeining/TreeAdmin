@@ -579,7 +579,7 @@ function Animal_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if ~handles.admin.key_pressed
-    if numel(handles.filter.selected_animals) ~= numel(get(hObject,'Value')) || any(handles.filter.selected_animals ~= get(hObject,'Value'))
+    if numel(handles.filter.selected_animals) ~= numel(get(hObject,'Value')) || any(handles.filter.selected_animals ~= get(hObject,'Value')')
         handles.filter.selected_trees = 1;
         set(handles.Trees,'Value',1)
         set(handles.n_sel_trees,'String','1 tree(s) selected')
@@ -690,6 +690,29 @@ if strcmp(get(hObject,'Enable'),'on') && ~isempty(get(hObject,'String'))
     TreeAdmin_UpdateGUI(handles);
 end
 
+% --- Executes on key press with focus on Trees box.
+function Animal_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  structure with the following fields (see FIGURE)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA
+if strcmp(eventdata.Key,'delete')
+    delete_these_animals = handles.filter.filtered_animals(handles.filter.selected_animals);
+    for n = 1:numel(delete_these_animals)
+        delete_these = cellfun(@(x) strcmp(x.animal,delete_these_animals{n}),handles.admin.all_trees);
+        if any(delete_these)
+            handles.admin.deleted_trees(delete_these) = true;
+        end
+    end
+    handles.filter.changed = 1;
+    handles.filter.selected_trees = 1;
+    set(handles.Trees,'Value',1)
+    set(handles.n_sel_trees,'String','1 tree(s) selected')
+    set(handles.Animal,'Value',1)
+    TreeAdmin_UpdateGUI(handles);
+end
 
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
 % --- Otherwise, executes on mouse press in 5 pixel border or over Trees.
@@ -717,6 +740,19 @@ if ~isempty(get(handles.Trees,'String'))
     TreeAdmin_UpdateGUI(handles);
 end
 
+% --- Executes on key press with focus on Trees box.
+function Trees_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  structure with the following fields (see FIGURE)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA
+if strcmp(eventdata.Key,'delete')
+    handles.admin.deleted_trees(cat(1,handles.filter.filtered_tree_names{handles.filter.selected_trees,2})) = true;
+    handles.filter.changed = 1;
+    TreeAdmin_UpdateGUI(handles);
+end
 
 % --- Executes on button press in Legend_ok.
 function Legend_ok_Callback(hObject, eventdata, handles)
