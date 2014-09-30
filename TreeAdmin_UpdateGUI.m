@@ -140,7 +140,7 @@ elseif ~handles.admin.locktreelist_ok
     if ~isempty(selanimind)
         handles.filter.selected_animals = selanimind;
         set(handles.Animal,'Value',selanimind)
-    elseif isempty(handles.filter.selected_animals) || ~all(get(handles.Animal,'Value') == handles.filter.selected_animals) || any(handles.filter.selected_animals > numel(handles.filter.filtered_animals))
+    elseif isempty(handles.filter.selected_animals) || ~all(get(handles.Animal,'Value')' == handles.filter.selected_animals) || any(handles.filter.selected_animals > numel(handles.filter.filtered_animals))
         set(handles.Animal,'Value',1)
         handles.filter.selected_animals = 1;
     end

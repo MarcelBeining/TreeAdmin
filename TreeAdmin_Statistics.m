@@ -3,10 +3,15 @@ function TreeAdmin_Statistics(treegroups,treenames)
 global stats
 sholl_diam = 25;
 use = 1:numel(treegroups);
-
+col = {'b','r','g','y','k','c'};
+vcol = [[0 0 1];[1 0 0];[0 1 0];[1 1 0];[0 0 0];[0 1 1]];
+col = col(1:numel(use));
+vcol = vcol(1:numel(use),:);
 
 figure
-stats = stats_tree(treegroups,treenames,[],'-w-x-s');
+stats = stats_tree(treegroups,treenames,[],'-w-x');
+dstats_tree (stats, vcol, '-d -c -g');
+
 max_radg = 300;
 
 for u = 1:numel(use)
@@ -25,8 +30,7 @@ end
 figure(3)
 subplot(3,2,1)
 hold on
-col = {'b','r','g','y'};
-col = col(1:numel(use));
+
 maxlen=0;
 
 for i = 1:numel(use)
@@ -62,8 +66,8 @@ ylabel('[%]')
 
 subplot(3,2,3)
 hold on
-euclall = cell(2,1);
-angall = cell(2,1);
+euclall = cell(numel(treegroups),1);
+angall = cell(numel(treegroups),1);
 for i=1:numel(treegroups)
     for o=1:numel(treegroups{i})
         eucl = eucl_tree(treegroups{i}{o});
@@ -92,8 +96,8 @@ ylabel('[%]')
 
 subplot(3,2,5)
 hold on
-euclall = cell(2,1);
-angall = cell(2,1);
+euclall = cell(numel(treegroups),1);
+angall = cell(numel(treegroups),1);
 for i=1:numel(treegroups)
     for o=1:numel(treegroups{i})
         eucl = eucl_tree(treegroups{i}{o});
@@ -122,8 +126,8 @@ ylabel('[%]')
 
 subplot(4,2,7)
 hold on
-plall = cell(2,1);
-angall = cell(2,1);
+plall = cell(numel(treegroups),1);
+angall = cell(numel(treegroups),1);
 for i=1:numel(treegroups)
     for o=1:numel(treegroups{i})
         pl = PL_tree(treegroups{i}{o});
@@ -173,33 +177,87 @@ if numel(unique(cellfun(@numel,treegroups))) == 1
     
     
     subplot(3,4,7)
-    hist(cat(2,cat(2,stats.gstats.mblen)))
+    h=hist(cat(2,cat(2,stats.gstats.mblen)));
     title('Mean Branch Length')
     
     subplot(3,4,8)
-    hist(cat(2,cat(2,stats.gstats.mplen)))
+    h=hist(cat(2,cat(2,stats.gstats.mplen)));
     title('Mean Path Length')
     
     subplot(3,4,9)
-    hist(cat(2,cat(2,stats.gstats.max_plen)))
+    h=hist(cat(2,cat(2,stats.gstats.max_plen)));
     title('Max Path Length')
     
     subplot(3,4,10)
-    hist(cat(2,stats.gstats.bpoints))
+    h=hist(cat(2,stats.gstats.bpoints));
     title('Number of Branch Points')
+else
+    figure(2)
+    subplot(3,4,1)
+    errorbar(cellfun(@mean,{stats.gstats.maxsholl}),cellfun(@std,{stats.gstats.maxsholl})./sqrt(cellfun(@numel,treegroups))','x');
+    title('Maximum Sholl Intersections')
+    ylabel('Diameter [µm]')
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
+    subplot(3,4,2)
+    errorbar(cellfun(@mean,{stats.gstats.maxshollrad}),cellfun(@std,{stats.gstats.maxshollrad})./sqrt(cellfun(@numel,treegroups))','x');
+    title('Distances of Maximum Sholl Intersection')
+    set(gca,'YLim',[0 max_radg])
+    set(gca,'YTick',0:50:max_radg)
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
+    subplot(3,4,3)
+    errorbar(cellfun(@mean,{stats.gstats.maxbo}),cellfun(@std,{stats.gstats.maxbo})./sqrt(cellfun(@numel,treegroups))','x');
+    title('Maximum Branching Order')
+    set(gca,'YLim',[1 10])
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
+    subplot(3,4,4)
+    errorbar(cellfun(@mean,{stats.gstats.mbo}),cellfun(@std,{stats.gstats.mbo})./sqrt(cellfun(@numel,treegroups))','x');
+    title('Mean Branching Order')
+    set(gca,'YLim',[1 10])
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
+    subplot(3,4,5)
+    errorbar(cellfun(@mean,cellfun(@rad2deg,{stats.gstats.mangleB},'UniformOutput',0)),cellfun(@std,cellfun(@rad2deg,{stats.gstats.mangleB},'UniformOutput',0))./sqrt(cellfun(@numel,treegroups))','x');
+    title('Mean Angle [°]')
+    set(gca,'YLim',[0 100])
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
+    
+    subplot(3,4,6)
+    errorbar(cellfun(@mean,{stats.gstats.len}),cellfun(@std,{stats.gstats.len})./sqrt(cellfun(@numel,treegroups))','x');
+    title('Total Cable Length')
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
+    subplot(3,4,7)
+    errorbar(cellfun(@mean,{stats.gstats.mblen}),cellfun(@std,{stats.gstats.mblen})./sqrt(cellfun(@numel,treegroups))','x');
+    title('Mean Branch Length')
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
+    subplot(3,4,8)
+    errorbar(cellfun(@mean,{stats.gstats.mplen}),cellfun(@std,{stats.gstats.mplen})./sqrt(cellfun(@numel,treegroups))','x');
+    title('Mean Path Length')
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
+    subplot(3,4,9)
+    errorbar(cellfun(@mean,{stats.gstats.max_plen}),cellfun(@std,{stats.gstats.max_plen})./sqrt(cellfun(@numel,treegroups))','x');
+    title('Max Path Length')
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
+    subplot(3,4,10)
+    errorbar(cellfun(@mean,{stats.gstats.bpoints}),cellfun(@std,{stats.gstats.bpoints})./sqrt(cellfun(@numel,treegroups))','x');
+    title('Number of Branch Points')
+    set(gca,'XTick',1:numel(treegroups))
+    set(gca,'XTickLabel',stats.s)
+    
 end
-% %%
-% tc= []; bc =[]; cc=[];
-% for i = 1:numel(clay.trees)
-% tc = cat(1,tc,sum(T_tree(clay.trees{i})));
-% bc = cat(1,bc,sum(B_tree(clay.trees{i})));
-% cc = cat(1,cc,sum(C_tree(clay.trees{i})));
-% end
-% 
-% t35= []; b35 =[]; c35=[];
-% for i = 1:numel(trees{1})
-% t35 = cat(1,t35,sum(T_tree(trees{1}{i})));
-% b35 = cat(1,b35,sum(B_tree(trees{1}{i})));
-% c35 = cat(1,c35,sum(C_tree(trees{1}{i})));
-% end
-% 

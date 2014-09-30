@@ -23,7 +23,7 @@ function varargout = TreeAdmin(varargin)
 
 % Edit the above text to modify the response to help TreeAdmin
 
-% Last Modified by GUIDE v2.5 26-Sep-2013 17:19:07
+% Last Modified by GUIDE v2.5 30-Sep-2014 14:17:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -276,9 +276,23 @@ function uipushopen_ClickedCallback(hObject, eventdata, handles,mode)
 % hObject    handle to uipushopen (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if isfield(handles.admin,'all_tree_file_names') && ~isempty(handles.admin.all_tree_file_names)
+    answer = questdlg('Add files to current catalog or forget current catalog and make a new one?','Concatenate?','Add','New','Add');
+    
+    if strcmp(answer,'Add')
+        startind = numel(handles.admin.all_tree_file_names)+1;
+    elseif strcmp(answer,'New')
+        startind = 1;
+    else
+        return
+    end
+else
+    startind = 1;
+end
+
 switch mode
     case 1
-        handles.admin.all_tree_file_names = [];
+        %handles.admin.all_tree_file_names = [];
         [all_tree_file_names, handles.admin.curr_dir ] = uigetfile({'*.mtr;*.swc;*.neu','Reconstruction Files (*.mtr,*.swc,*.neu)';
             '*.mtr',  'Treestoolbox files (*.mtr)'; ...
             '*.swc','Neurolucida files (*.swc)'; ...
@@ -288,10 +302,10 @@ switch mode
         end
         if iscell(all_tree_file_names)
             for f = 1:numel(all_tree_file_names)
-                handles.admin.all_tree_file_names(f).name = all_tree_file_names{f};
+                handles.admin.all_tree_file_names(startind+f-1).name = all_tree_file_names{f};
             end
         else
-            handles.admin.all_tree_file_names.name = all_tree_file_names;
+            handles.admin.all_tree_file_names(startind).name = all_tree_file_names;
         end
     case 2
         handles.admin.curr_dir = uigetdir(handles.admin.curr_dir,'Choose the directory which comprises the tree files');
@@ -299,19 +313,20 @@ switch mode
             return
         end
 
-        handles.admin.all_tree_file_names = dir(sprintf('%s/*',handles.admin.curr_dir));
-        handles.admin.all_tree_file_names = handles.admin.all_tree_file_names(~cellfun(@isempty,regexpi({handles.admin.all_tree_file_names.name},'.*(mtr|swc|neu)')));
-        for f = 1:numel(handles.admin.all_tree_file_names)
+        all_tree_file_names = dir(sprintf('%s/*',handles.admin.curr_dir));
+        handles.admin.all_tree_file_names = cat(2,handles.admin.all_tree_file_names,all_tree_file_names(~cellfun(@isempty,regexpi({all_tree_file_names.name},'.*(mtr|swc|neu)'))));
+        for f = startind:numel(handles.admin.all_tree_file_names)+startind-1
             handles.admin.all_tree_file_names(f).changed = false;
         end
 end
 
 % if numel(handles.admin.all_tree_file_names) == 0
-
-handles.admin.all_trees = cell(0);
+if strcmp(answer,'New')
+    handles.admin.all_trees = cell(0);
+end
 wrong_file = 0;
 % names = cell(0);
-for f = 1:numel(handles.admin.all_tree_file_names)
+for f = startind:numel(handles.admin.all_tree_file_names)
     curr_file = load_tree(fullfile(handles.admin.curr_dir,handles.admin.all_tree_file_names(f).name));
     if iscell(curr_file) && iscell(curr_file{1})
         if numel(curr_file) == 1
@@ -931,6 +946,17 @@ TreeAdmin_UpdateStats(handles);
 guidata(handles.TreeAdmin,handles);
 
 
+% --- Executes on button press in Save_Stat_Trees.
+function Save_Stat_Trees_Callback(hObject, eventdata, handles)
+% hObject    handle to Save_Stat_Trees (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[FileName,PathName]  = uiputfile('*.mtr','Choose Folder and File Name to save Statistics Tree groups.','StatTrees.mtr');
+if ~ischar(FileName)
+    return
+end
+save_tree(handles.admin.stat_trees(:,1),fullfile(PathName,FileName));
+
 % --------------------------------------------------------------------
 function Rescale_Trees_ClickedCallback(hObject, eventdata, handles)
 % hObject    handle to Rescale_Trees (see GCBO)
@@ -978,4 +1004,3 @@ for f = 1:numel(fnames)
     handles.filter.(fnames{f}) = false;
     set(handles.(fnames{f}),'Value',0)
 end
-
