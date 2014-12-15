@@ -23,7 +23,7 @@ function varargout = TreeAdmin(varargin)
 
 % Edit the above text to modify the response to help TreeAdmin
 
-% Last Modified by GUIDE v2.5 30-Sep-2014 14:17:41
+% Last Modified by GUIDE v2.5 11-Dec-2014 09:13:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -283,10 +283,15 @@ if isfield(handles.admin,'all_tree_file_names') && ~isempty(handles.admin.all_tr
         startind = numel(handles.admin.all_tree_file_names)+1;
     elseif strcmp(answer,'New')
         startind = 1;
+        handles.admin.all_trees = cell(0);
+        handles.admin.all_tree_file_names = [];
+        handles.admin.stat_trees = cell(0,2);
     else
         return
     end
 else
+    handles.admin.all_tree_file_names = [];
+    handles.admin.all_trees = cell(0);
     startind = 1;
 end
 
@@ -302,10 +307,10 @@ switch mode
         end
         if iscell(all_tree_file_names)
             for f = 1:numel(all_tree_file_names)
-                handles.admin.all_tree_file_names(startind+f-1).name = all_tree_file_names{f};
+                handles.admin.all_tree_file_names(startind+f-1).name = fullfile(handles.admin.curr_dir,all_tree_file_names{f});
             end
         else
-            handles.admin.all_tree_file_names(startind).name = all_tree_file_names;
+            handles.admin.all_tree_file_names(startind).name = fullfile(handles.admin.curr_dir,all_tree_file_names);
         end
     case 2
         handles.admin.curr_dir = uigetdir(handles.admin.curr_dir,'Choose the directory which comprises the tree files');
@@ -314,20 +319,22 @@ switch mode
         end
 
         all_tree_file_names = dir(sprintf('%s/*',handles.admin.curr_dir));
-        handles.admin.all_tree_file_names = cat(2,handles.admin.all_tree_file_names,all_tree_file_names(~cellfun(@isempty,regexpi({all_tree_file_names.name},'.*(mtr|swc|neu)'))));
-        for f = startind:numel(handles.admin.all_tree_file_names)+startind-1
+        for f = 1:numel(all_tree_file_names)
+            all_tree_file_names(f).name = fullfile(handles.admin.curr_dir,all_tree_file_names(f).name);
+            all_tree_file_names(f).changed = false;
+            all_tree_file_names(f).treeref = [];
+        end
+        handles.admin.all_tree_file_names = cat(1,handles.admin.all_tree_file_names,all_tree_file_names(~cellfun(@isempty,regexpi({all_tree_file_names.name},'.mtr')) & cellfun(@isempty,regexpi({all_tree_file_names.name},'.asv'))));
+        for f = startind:numel(handles.admin.all_tree_file_names)
             handles.admin.all_tree_file_names(f).changed = false;
         end
 end
 
 % if numel(handles.admin.all_tree_file_names) == 0
-if strcmp(answer,'New')
-    handles.admin.all_trees = cell(0);
-end
 wrong_file = 0;
 % names = cell(0);
 for f = startind:numel(handles.admin.all_tree_file_names)
-    curr_file = load_tree(fullfile(handles.admin.curr_dir,handles.admin.all_tree_file_names(f).name));
+    curr_file = load_tree(fullfile(handles.admin.all_tree_file_names(f).name));
     if iscell(curr_file) && iscell(curr_file{1})
         if numel(curr_file) == 1
             curr_file = curr_file{1};
@@ -354,7 +361,7 @@ end
 if wrong_file > 0
    warndlg(sprintf('Warning: %d files could not be loaded because a file must only have one tree group!',wrong_file),'Unsupported Files')
 end
-handles.admin.stat_trees = cell(0,2);
+
 TreeAdmin_UpdateStats(handles);
 
 handles.admin.deleted_trees = false(numel(handles.admin.all_trees),1);
@@ -392,7 +399,7 @@ for f = 1:numel(handles.admin.all_tree_file_names)
     if numel(curr_file{1}) == 1
        curr_file = curr_file{1}; 
     end
-    save_tree(curr_file,fullfile(handles.admin.curr_dir,handles.admin.all_tree_file_names(f).name));
+    save_tree(curr_file,fullfile(handles.admin.all_tree_file_names(f).name));
 end
 close(w)
 
@@ -967,6 +974,7 @@ new_scale = str2num(new_scale{1});
 if numel(new_scale)~=3 || isempty(new_scale)
     return
 end
+w = waitbar(0,'Please wait...');
 for i = 1: numel(handles.filter.selected_trees)
     tree = handles.admin.all_trees{handles.filter.filtered_tree_names{handles.filter.selected_trees(i),2}};
     if isfield(tree,'x_scale') && ~isempty(tree.x_scale)
@@ -991,7 +999,9 @@ for i = 1: numel(handles.filter.selected_trees)
     end
 
     handles.admin.all_trees{handles.filter.filtered_tree_names{handles.filter.selected_trees(i),2}} = resample_tree(scale_tree (tree, fac),1,'-d');
+    waitbar(i/numel(handles.filter.selected_trees),w)
 end
+close(w);
 guidata(handles.TreeAdmin,handles);
 TreeAdmin_UpdateGUI(handles);
 
@@ -1004,3 +1014,53 @@ for f = 1:numel(fnames)
     handles.filter.(fnames{f}) = false;
     set(handles.(fnames{f}),'Value',0)
 end
+
+
+% --- Executes on button press in make_sorted_files.
+function make_sorted_files_Callback(hObject, eventdata, handles)
+% hObject    handle to make_sorted_files (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+tdir = uigetdir(pwd,'Please choose directory to save tree files in');
+answer = inputdlg('Please give specification of tree (e.g. all or sure etc.)','Tree Specification',1,{'all'});
+dpi = cellfun(@(x) x.dpi,handles.admin.all_trees);
+udpi = unique(dpi);
+side = 1+ cellfun(@(x) strcmp(x.lateral_side,'ipsi'),handles.admin.all_trees) + 2*cellfun(@(x) strcmp(x.lateral_side,'contra'),handles.admin.all_trees) ; % 1 is all, 2 is ipsi, 3 is contra
+blade = 1 + cellfun(@(x) strcmp(x.pyramidal_blade,'supra'),handles.admin.all_trees) + 2 * cellfun(@(x) strcmp(x.pyramidal_blade,'infra'),handles.admin.all_trees);  % 1 is all, 2 is supra, 3 is infra
+compl = cellfun(@(x) x.completeness,handles.admin.all_trees);
+
+sid = {'ALL','ipsi','contra'};
+blad = {'ALL','supra','infra'};
+w = waitbar(0,'Please wait...');
+for u = 1:numel(udpi)+1
+    for s = 1:numel(sid)
+        for b = 1:numel(blad)
+            for c = [0, 70, 80, 90]
+                these_trees = handles.admin.filter' & compl >= c;
+                if s ~= 1
+                    these_trees = these_trees & side == s;
+                end
+                if b ~= 1
+                    these_trees = these_trees & blade == b;
+                end
+                if u ~= 1
+                    these_trees = these_trees & dpi == udpi(u-1);
+                end
+                if b == 1 && s == 1
+                    continue
+                end
+                if sum(these_trees) > 1
+                    if u == 1
+                        save_tree(handles.admin.all_trees(these_trees),fullfile(tdir,sprintf('ALL_%s_%s_%s_%d+.mtr',sid{s},blad{b},answer{1},c)));
+                    elseif udpi(u-1) == 0
+                        save_tree(handles.admin.all_trees(these_trees),fullfile(tdir,sprintf('Mature_%s_%s_%s_%d+.mtr',sid{s},blad{b},answer{1},c)));
+                    else
+                        save_tree(handles.admin.all_trees(these_trees),fullfile(tdir,sprintf('%ddpi_%s_%s_%s_%d+.mtr',udpi(u-1),sid{s},blad{b},answer{1},c)));
+                    end
+                end
+            end
+        end
+    end
+    waitbar(u/(numel(udpi)+1),w)
+end
+close(w)
