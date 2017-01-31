@@ -166,6 +166,8 @@ if sum(handles.admin.filter) ~= 0
         handles.admin.selected_detail = [];
     end
     set(handles.Details,'Enable','on')
+    cont = {'','...'};
+    selected_tree_names =  cellfun(@(x) strcat(x(1:min(size(x,2),35)),cont{(min(size(x,2),35)==35)+1}),selected_tree_names,'UniformOutput',0);
     set(handles.Details,'RowName',selected_tree_names)
     %     selected_trees = cat(1,handles.admin.all_trees{cat(1,handles.filter.filtered_tree_names{handles.filter.selected_trees,2})}); %struct
     selected_trees = handles.admin.all_trees(cat(1,handles.filter.filtered_tree_names{handles.filter.selected_trees,2}));
@@ -183,9 +185,22 @@ end
 set(handles.TreeAdmin,'CurrentAxes',handles.Preview)
 cla(handles.Preview)
 if handles.admin.preview_ok && exist('selected_trees','var')
+    if handles.admin.rotate_ok
+        for t = 1:numel(selected_trees)
+            selected_trees{t} = rot_tree(selected_trees{t},[],'-m3dY');
+            
+        end
+    end
     [DD,spreaded_trees] = spread_tree(selected_trees);
-    for t = 1:numel(selected_trees)
-        plot_tree(spreaded_trees{t},handles.admin.treecolors(t,:));%, color, DD, ipart, res, options)
+    for t = 1:numel(spreaded_trees)
+        spreaded_trees{t}.D(spreaded_trees{t}.D<3) = 3;
+        %         plot_tree(spreaded_trees{t},handles.admin.treecolors(t,:));%, color, DD, ipart, res, options)
+        if numel(spreaded_trees{t}.R) == numel(spreaded_trees{t}.X)
+            plot_tree(spreaded_trees{t},handles.admin.treecolors(spreaded_trees{t}.R,:));%, color, DD, ipart, res, options)
+        else
+            plot_tree(spreaded_trees{t});%, color, DD, ipart, res, options)
+        end
+        
     end
 end
 

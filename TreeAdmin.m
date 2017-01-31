@@ -23,7 +23,7 @@ function varargout = TreeAdmin(varargin)
 
 % Edit the above text to modify the response to help TreeAdmin
 
-% Last Modified by GUIDE v2.5 11-Dec-2014 09:13:55
+% Last Modified by GUIDE v2.5 25-Apr-2016 10:52:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -103,8 +103,11 @@ handles.admin.stat_trees = cell(0,2);
 
 handles.admin.locktreelist_ok = false;
 handles.admin.preview_ok = true;
+handles.admin.rotate_ok = true;
 b=axes('position',[20 20 100 100],'visible','off');
-handles.admin.treecolors = colormap(b,'lines');
+% handles.admin.treecolors = colormap(b,'lines');
+handles.admin.treecolors = colorme({'blue','light blue','green','orange','dim red','dark red'});
+handles.admin.treecolors = cat(1,handles.admin.treecolors{:});
 delete(b)
 set(handles.TreeAdmin,'Position',[1,1,1200,650]);
 handles.varargin = false;
@@ -336,12 +339,13 @@ wrong_file = 0;
 for f = startind:numel(handles.admin.all_tree_file_names)
     curr_file = load_tree(fullfile(handles.admin.all_tree_file_names(f).name));
     if iscell(curr_file) && iscell(curr_file{1})
-        if numel(curr_file) == 1
-            curr_file = curr_file{1};
-        else
-            wrong_file = wrong_file +1;
-            continue
-        end
+%         if numel(curr_file) == 1
+%             curr_file = curr_file{1};
+%         else
+%             wrong_file = wrong_file +1;
+%             continue
+%         end
+        curr_file = cat_groups(curr_file);
     elseif isstruct(curr_file)
         curr_file = {curr_file};
     end
@@ -1022,8 +1026,14 @@ function make_sorted_files_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 tdir = uigetdir(pwd,'Please choose directory to save tree files in');
+if ~ischar(tdir)
+    return
+end
 answer = inputdlg('Please give specification of tree (e.g. all or sure etc.)','Tree Specification',1,{'all'});
-dpi = cellfun(@(x) x.dpi,handles.admin.all_trees);
+if ~ischar(answer{1})
+    return
+end
+dpi = cellfun(@(x) double(x.dpi),handles.admin.all_trees);
 udpi = unique(dpi);
 side = 1+ cellfun(@(x) strcmp(x.lateral_side,'ipsi'),handles.admin.all_trees) + 2*cellfun(@(x) strcmp(x.lateral_side,'contra'),handles.admin.all_trees) ; % 1 is all, 2 is ipsi, 3 is contra
 blade = 1 + cellfun(@(x) strcmp(x.pyramidal_blade,'supra'),handles.admin.all_trees) + 2 * cellfun(@(x) strcmp(x.pyramidal_blade,'infra'),handles.admin.all_trees);  % 1 is all, 2 is supra, 3 is infra
@@ -1064,3 +1074,46 @@ for u = 1:numel(udpi)+1
     waitbar(u/(numel(udpi)+1),w)
 end
 close(w)
+
+function endfile = cat_groups(file)
+endfile = cell(0);
+for f = 1:numel(file)
+    if size(file{f},1) > size(file{f},2)
+        file{f} = file{f}';
+    end
+    endfile = cat(2,endfile,file{f});
+end
+    
+
+
+% --- Executes on button press in Rotate_ok.
+function Rotate_ok_Callback(hObject, eventdata, handles)
+% hObject    handle to Rotate_ok (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(hObject,'Value')
+    handles.admin.rotate_ok = true;
+else
+    handles.admin.rotate_ok = false;
+end
+TreeAdmin_UpdateGUI(handles);
+
+
+% --- Executes on button press in x3d.
+function x3d_Callback(hObject, eventdata, handles)
+% hObject    handle to x3d (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+trees = handles.admin.all_trees(cat(1,handles.filter.filtered_tree_names{handles.filter.selected_trees,2}));
+
+[tname, path] = uiputfile ('.x3d', 'export to x3d', 'tree.x3d');
+if ~isempty(strfind(tname,'.x3d'))
+    tname = tname(1:end-4);
+end
+for t = 1:numel(trees)
+    if numel(trees)>1
+        x3d_tree (trees{t}, fullfile(path,sprintf('%s_%03d.x3d',tname,t)),[],[],[], '-o')
+    else
+        x3d_tree (trees{t}, fullfile(path,[tname,'.x3d']),[],[],[], '-o')
+    end
+end
