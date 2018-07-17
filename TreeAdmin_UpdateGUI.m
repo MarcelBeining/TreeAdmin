@@ -8,6 +8,9 @@ end
 if numel(handles.admin.all_trees) > size(handles.admin.treecolors,1)
     handles.admin.treecolors = repmat(handles.admin.treecolors,[ceil(numel(handles.admin.all_trees)/size(handles.admin.treecolors,1)),1]);
 end
+if max(cellfun(@(x) max(x.R),handles.admin.all_trees)) > size(handles.admin.treecolors,1)
+    handles.admin.treecolors = repmat(handles.admin.treecolors,[ceil(max(cellfun(@(x) max(x.R),handles.admin.all_trees))/size(handles.admin.treecolors,1)),1]);
+end
 
 if handles.filter.changed && ~handles.admin.locktreelist_ok
     handles.filter.changed = false;
@@ -191,14 +194,13 @@ if handles.admin.preview_ok && exist('selected_trees','var')
             
         end
     end
-    [DD,spreaded_trees] = spread_tree(selected_trees);
+    [~,spreaded_trees] = spread_tree(selected_trees);
     for t = 1:numel(spreaded_trees)
         spreaded_trees{t}.D(spreaded_trees{t}.D<3) = 3;
-        %         plot_tree(spreaded_trees{t},handles.admin.treecolors(t,:));%, color, DD, ipart, res, options)
         if numel(spreaded_trees{t}.R) == numel(spreaded_trees{t}.X)
-            plot_tree(spreaded_trees{t},handles.admin.treecolors(spreaded_trees{t}.R,:));%, color, DD, ipart, res, options)
+            plot_tree(spreaded_trees{t},handles.admin.treecolors(spreaded_trees{t}.R,:));
         else
-            plot_tree(spreaded_trees{t});%, color, DD, ipart, res, options)
+            plot_tree(spreaded_trees{t});
         end
         
     end

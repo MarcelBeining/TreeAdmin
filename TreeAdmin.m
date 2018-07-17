@@ -46,7 +46,7 @@ end
 
 
 % --- Executes just before TreeAdmin is made visible.
-function TreeAdmin_OpeningFcn(hObject, eventdata, handles, varargin)
+function TreeAdmin_OpeningFcn(hObject, ~, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -61,9 +61,6 @@ handles.admin.key_pressed = false;
 handles.TreeAdmin = hObject;
 handles.admin.tags = {'animal','region','cell_type','dpi','HFS','lateral_side','pyramidal_blade','arc','completeness','x_scale','y_scale','z_scale','tracing_unsure','done'};
 handles.admin.tags(2,:) = cellfun(@str2func,{'num2str','num2str','num2str','uint16','num2str','num2str','num2str','num2str','uint8','single','single','single','num2str','num2str'},'UniformOutput', false);
-% handles.admin.tags(3,:) = {false,false,false,true,true,true,true,true,true,false,false,false,true,true};
-% handles.admin.tags(4,:) = {{'Name'},{'Name'},{'Name'},{'from','to'},{'yes','no'},{'check_ipsi','check_contra'},{'check_supra','check_infra','crest'},{'positive','negative'},{'from','to'},{'from','to'},{'from','to'},{'from','to'},{'yes','no'},{'yes','no'}};
-% handles.admin.tags(5,:) = {{''},{''},{''},{0,300},{false,false},{false,false},{false,false,false},{false,false},{0,100},{0,5},{0,5},{0,5},{false,false},{false,false}};
 set(handles.Details,'ColumnFormat',{'char','char','char','short',{'unknown','yes','no'},{'unknown','ipsi','contra'},{'unknown','supra','infra','crest'},{'unknown','positive','negative'},'short','short','short','short',{'unknown','yes','no'},{'unknown','yes','no'}})
 handles.filter.check_dpi = false;
 handles.filter.dpi_min = 0;
@@ -82,12 +79,6 @@ handles.filter.check_infra = 0;
 handles.filter.check_arc_pos = 0;
 handles.filter.check_arc_neg = 0;
 
-% handles.admin.tags = handles.admin.tags(:,cell2mat(handles.admin.tags(3,:)));
-% FilterTags = cell(max(cellfun(@(x) numel(x),handles.admin.tags(4,:)))+1,size(handles.admin.tags,2)*2);
-% for f = 1:size(handles.admin.tags,2)
-%    FilterTags(1:numel(handles.admin.tags{4,f})+1,2*f-1) =  [handles.admin.tags(1,f) handles.admin.tags{4,f}]';
-%     FilterTags(1:numel(handles.admin.tags{4,f})+1,2*f) = [false, handles.admin.tags{5,f}]';
-% end
 handles.filter.changed = false;
 handles.filter.selected_animals = 1;
 handles.filter.selected_trees = 1;
@@ -105,8 +96,7 @@ handles.admin.locktreelist_ok = false;
 handles.admin.preview_ok = true;
 handles.admin.rotate_ok = true;
 b=axes('position',[20 20 100 100],'visible','off');
-% handles.admin.treecolors = colormap(b,'lines');
-handles.admin.treecolors = colorme({'blue','light blue','green','orange','dim red','dark red'});
+handles.admin.treecolors = colorme({'blue','light blue','green','orange','dim red','dark red','pink','violett','black'});
 handles.admin.treecolors = cat(1,handles.admin.treecolors{:});
 delete(b)
 set(handles.TreeAdmin,'Position',[1,1,1200,650]);
@@ -122,7 +112,6 @@ if ~isempty(varargin)
         set(handles.uipushopensingle,'Enable','off')
         set(handles.uipushsave,'Enable','off')
         set(handles.uipushsavenew,'Enable','off')
-%         set(handles.Rescale_Trees,'Enable','off')
         handles.filter.changed = 1;
         handles.admin.deleted_trees = false(numel(handles.admin.all_trees),1);
         handles.varargin = true;
@@ -147,7 +136,7 @@ end
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = TreeAdmin_OutputFcn(hObject, eventdata, handles) 
+function varargout = TreeAdmin_OutputFcn(~, ~, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -160,16 +149,8 @@ if handles.varargin && isfield(handles.admin,'all_trees')
 end
 
 
-
 % --- Executes during object creation, after setting all properties.
-function figure1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to figure1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-
-% --- Executes during object creation, after setting all properties.
-function Animal_CreateFcn(hObject, eventdata, handles)
+function Animal_CreateFcn(hObject, ~, ~)
 % hObject    handle to Animal (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -180,9 +161,27 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+% --- Executes during object creation, after setting all properties.
+function figure1_CreateFcn(~, ~, ~)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
 
 % --- Executes during object creation, after setting all properties.
-function Dpi_CreateFcn(hObject, eventdata, handles)
+function Details_CreateFcn(~, ~, ~)
+% hObject    handle to Details (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+
+
+% --- Executes during object creation, after setting all properties.
+function Dpi_CreateFcn(hObject, ~, ~)
 % hObject    handle to Dpi (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -194,7 +193,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 % --- Executes during object creation, after setting all properties.
-function dpi_min_CreateFcn(hObject, eventdata, handles)
+function dpi_min_CreateFcn(hObject, ~, ~)
 % hObject    handle to dpi_min (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -206,7 +205,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 % --- Executes during object creation, after setting all properties.
-function dpi_max_CreateFcn(hObject, eventdata, handles)
+function dpi_max_CreateFcn(hObject, ~, ~)
 % hObject    handle to dpi_max (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -219,7 +218,7 @@ end
 
 
 % --- Executes during object creation, after setting all properties.
-function Completeness_min_CreateFcn(hObject, eventdata, handles)
+function Completeness_min_CreateFcn(hObject, ~, ~)
 % hObject    handle to Completeness_min (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -231,7 +230,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 % --- Executes during object creation, after setting all properties.
-function Completeness_max_CreateFcn(hObject, eventdata, handles)
+function Completeness_max_CreateFcn(hObject, ~, ~)
 % hObject    handle to Completeness_max (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -244,14 +243,7 @@ end
 
 
 % --- Executes during object creation, after setting all properties.
-function Details_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to Details (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-
-% --- Executes during object creation, after setting all properties.
-function Trees_CreateFcn(hObject, eventdata, handles)
+function Trees_CreateFcn(hObject, ~, ~)
 % hObject    handle to Trees (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -263,7 +255,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 % --- Executes during object creation, after setting all properties.
-function Stat_Trees_CreateFcn(hObject, eventdata, handles)
+function Stat_Trees_CreateFcn(hObject, ~, ~)
 % hObject    handle to Stat_Trees (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -275,7 +267,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 % --------------------------------------------------------------------
-function uipushopen_ClickedCallback(hObject, eventdata, handles,mode)
+function uipushopen_ClickedCallback(~, ~, handles,mode)
 % hObject    handle to uipushopen (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -382,7 +374,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --------------------------------------------------------------------
-function uipushsave_ClickedCallback(hObject, eventdata, handles)
+function uipushsave_ClickedCallback(~, ~, handles)
 % hObject    handle to uipushsave (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -408,7 +400,7 @@ end
 close(w)
 
 % --------------------------------------------------------------------
-function uipushsavenew_ClickedCallback(hObject, eventdata, handles)
+function uipushsavenew_ClickedCallback(~, ~, handles)
 % hObject    handle to uipushsavenew (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -426,7 +418,7 @@ save_tree(curr_file,fullfile(curr_dir,curr_filename));
 close(w)
 
 % --- Executes on button press in check_dpi.
-function check_dpi_Callback(hObject, eventdata, handles)
+function check_dpi_Callback(hObject, ~, handles)
 % hObject    handle to check_dpi (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -438,7 +430,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 
-function dpi_min_Callback(hObject, eventdata, handles)
+function dpi_min_Callback(hObject, ~, handles)
 % hObject    handle to dpi_min (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -454,7 +446,7 @@ end
 TreeAdmin_UpdateGUI(handles);
 
 
-function dpi_max_Callback(hObject, eventdata, handles)
+function dpi_max_Callback(hObject, ~, handles)
 % hObject    handle to dpi_max (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -471,7 +463,7 @@ end
 TreeAdmin_UpdateGUI(handles);
 
 % --- Executes on button press in check_arc_pos.
-function check_arc_pos_Callback(hObject, eventdata, handles)
+function check_arc_pos_Callback(hObject, ~, handles)
 % hObject    handle to check_arc_pos (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -482,7 +474,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --- Executes on button press in check_arc_neg.
-function check_arc_neg_Callback(hObject, eventdata, handles)
+function check_arc_neg_Callback(hObject, ~, handles)
 % hObject    handle to check_arc_neg (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -493,7 +485,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --- Executes on button press in check_HFS_pos.
-function check_HFS_pos_Callback(hObject, eventdata, handles)
+function check_HFS_pos_Callback(hObject, ~, handles)
 % hObject    handle to check_HFS_pos (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -504,7 +496,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --- Executes on button press in check_HFS_neg.
-function check_HFS_neg_Callback(hObject, eventdata, handles)
+function check_HFS_neg_Callback(hObject, ~, handles)
 % hObject    handle to check_HFS_neg (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -514,7 +506,7 @@ handles.filter.changed = 1;
 TreeAdmin_UpdateGUI(handles);
 
 % --- Executes on button press in check_infra.
-function check_infra_Callback(hObject, eventdata, handles)
+function check_infra_Callback(hObject, ~, handles)
 % hObject    handle to check_infra (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -525,7 +517,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --- Executes on button press in check_supra.
-function check_supra_Callback(hObject, eventdata, handles)
+function check_supra_Callback(hObject, ~, handles)
 % hObject    handle to check_supra (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -535,7 +527,7 @@ handles.filter.changed = 1;
 TreeAdmin_UpdateGUI(handles);
 
 % --- Executes on button press in check_completeness.
-function check_completeness_Callback(hObject, eventdata, handles)
+function check_completeness_Callback(hObject, ~, handles)
 % hObject    handle to check_completeness (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -544,7 +536,7 @@ handles.filter.check_completeness = get(hObject,'Value');
 handles.filter.changed = 1;
 TreeAdmin_UpdateGUI(handles);
 
-function Completeness_min_Callback(hObject, eventdata, handles)
+function Completeness_min_Callback(hObject, ~, handles)
 % hObject    handle to Completeness_min (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -559,7 +551,7 @@ if handles.filter.check_completeness
 end
 TreeAdmin_UpdateGUI(handles);
 
-function Completeness_max_Callback(hObject, eventdata, handles)
+function Completeness_max_Callback(hObject, ~, handles)
 % hObject    handle to Completeness_max (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -577,7 +569,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --- Executes on button press in check_ipsi.
-function check_ipsi_Callback(hObject, eventdata, handles)
+function check_ipsi_Callback(hObject, ~, handles)
 % hObject    handle to check_ipsi (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -587,7 +579,7 @@ handles.filter.changed = 1;
 TreeAdmin_UpdateGUI(handles);
 
 % --- Executes on button press in check_contra.
-function check_contra_Callback(hObject, eventdata, handles)
+function check_contra_Callback(hObject, ~, handles)
 % hObject    handle to check_contra (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -599,7 +591,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --- Executes on selection change in Animal.
-function Animal_Callback(hObject, eventdata, handles)
+function Animal_Callback(hObject, ~, handles)
 % hObject    handle to Animal (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -616,7 +608,7 @@ end
 
 
 % --- Executes on selection change in Trees.
-function Trees_Callback(hObject, eventdata, handles)
+function Trees_Callback(hObject, ~, handles)
 % hObject    handle to Trees (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -629,7 +621,7 @@ end
 
 
 % --- Executes when entered data in editable cell(s) in Details.
-function Details_CellEditCallback(hObject, eventdata, handles)
+function Details_CellEditCallback(~, eventdata, handles)
 % hObject    handle to Details (see GCBO)
 % eventdata  structure with the following fields (see UITABLE)
 %	Indices: row and column indices of the cell(s) edited
@@ -658,7 +650,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --- Executes on key press with focus on figure1 or any of its controls.
-function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
+function figure1_WindowKeyPressFcn(~, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
 %	Key: name of the key that was pressed, in lower case
@@ -671,7 +663,7 @@ if strcmp(eventdata.Key,{'uparrow','downarrow'})
 end
 
 % --- Executes on key release with focus on figure1 or any of its controls.
-function figure1_WindowKeyReleaseFcn(hObject, eventdata, handles)
+function figure1_WindowKeyReleaseFcn(~, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
 %	Key: name of the key that was released, in lower case
@@ -686,7 +678,7 @@ end
 
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
 % --- Otherwise, executes on mouse press in 5 pixel border or over Animal.
-function Animal_ButtonDownFcn(hObject, eventdata, handles)
+function Animal_ButtonDownFcn(hObject, ~, handles)
 % hObject    handle to Animal (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -717,7 +709,7 @@ if strcmp(get(hObject,'Enable'),'on') && ~isempty(get(hObject,'String'))
 end
 
 % --- Executes on key press with focus on Trees box.
-function Animal_KeyPressFcn(hObject, eventdata, handles)
+function Animal_KeyPressFcn(~, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
 %	Key: name of the key that was pressed, in lower case
@@ -742,7 +734,7 @@ end
 
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
 % --- Otherwise, executes on mouse press in 5 pixel border or over Trees.
-function Trees_ButtonDownFcn(hObject, eventdata, handles)
+function Trees_ButtonDownFcn(~, ~, handles)
 % hObject    handle to Trees (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -767,7 +759,7 @@ if ~isempty(get(handles.Trees,'String'))
 end
 
 % --- Executes on key press with focus on Trees box.
-function Trees_KeyPressFcn(hObject, eventdata, handles)
+function Trees_KeyPressFcn(~, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
 %	Key: name of the key that was pressed, in lower case
@@ -781,7 +773,7 @@ if strcmp(eventdata.Key,'delete')
 end
 
 % --- Executes on button press in Legend_ok.
-function Legend_ok_Callback(hObject, eventdata, handles)
+function Legend_ok_Callback(hObject, ~, handles)
 % hObject    handle to Legend_ok (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -793,7 +785,7 @@ end
 
 
 % --- Executes on button press in Preview_ok.
-function Preview_ok_Callback(hObject, eventdata, handles)
+function Preview_ok_Callback(hObject, ~, handles)
 % hObject    handle to Preview_ok (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -806,7 +798,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --------------------------------------------------------------------
-function Details_ButtonDownFcn(hObject, eventdata, handles)
+function Details_ButtonDownFcn(~, ~, handles)
 % hObject    handle to Details (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -857,7 +849,7 @@ end
 
 
 % --- Executes when selected cell(s) is changed in Details.
-function Details_CellSelectionCallback(hObject, eventdata, handles)
+function Details_CellSelectionCallback(~, eventdata, handles)
 % hObject    handle to Details (see GCBO)
 % eventdata  structure with the following fields (see UITABLE)
 %	Indices: row and column indices of the cell(s) currently selecteds
@@ -867,7 +859,7 @@ guidata(handles.TreeAdmin,handles);
 
 
 % --- Executes when user attempts to close figure1.
-function figure1_CloseRequestFcn(hObject, eventdata, handles)
+function figure1_CloseRequestFcn(hObject, ~, ~)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -884,7 +876,7 @@ end
 
 
 % --- Executes on button press in Lock_ok.
-function Lock_ok_Callback(hObject, eventdata, handles)
+function Lock_ok_Callback(hObject, ~, handles)
 % hObject    handle to Lock_ok (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -896,7 +888,7 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --- Executes on button press in check_notdone.
-function check_notdone_Callback(hObject, eventdata, handles)
+function check_notdone_Callback(hObject, ~, handles)
 % hObject    handle to check_notdone (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -905,7 +897,7 @@ handles.filter.changed = 1;
 TreeAdmin_UpdateGUI(handles);
 
 % --- Executes on button press in check_done.
-function check_done_Callback(hObject, eventdata, handles)
+function check_done_Callback(hObject, ~, handles)
 % hObject    handle to check_done (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -914,18 +906,8 @@ handles.filter.changed = 1;
 TreeAdmin_UpdateGUI(handles);
 
 
-% --- Executes on selection change in Stat_Trees.
-function Stat_Trees_Callback(hObject, eventdata, handles)
-% hObject    handle to Stat_Trees (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = get(hObject,'String') returns Stat_Trees contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from Stat_Trees
-
-
 % --- Executes on button press in Start_Stats.
-function Start_Stats_Callback(hObject, eventdata, handles)
+function Start_Stats_Callback(~, ~, handles)
 % hObject    handle to Start_Stats (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -934,7 +916,7 @@ TreeAdmin_Statistics(handles.admin.stat_trees(:,1), handles.admin.stat_trees(:,2
 
 
 % --- Executes on button press in Add_Stat_Trees.
-function Add_Stat_Trees_Callback(hObject, eventdata, handles)
+function Add_Stat_Trees_Callback(~, ~, handles)
 % hObject    handle to Add_Stat_Trees (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -947,7 +929,7 @@ TreeAdmin_UpdateStats(handles);
 guidata(handles.TreeAdmin,handles);
 
 % --- Executes on button press in Del_Stat_Trees.
-function Del_Stat_Trees_Callback(hObject, eventdata, handles)
+function Del_Stat_Trees_Callback(~, ~, handles)
 % hObject    handle to Del_Stat_Trees (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -958,7 +940,7 @@ guidata(handles.TreeAdmin,handles);
 
 
 % --- Executes on button press in Save_Stat_Trees.
-function Save_Stat_Trees_Callback(hObject, eventdata, handles)
+function Save_Stat_Trees_Callback(~, ~, handles)
 % hObject    handle to Save_Stat_Trees (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -969,12 +951,12 @@ end
 save_tree(handles.admin.stat_trees(:,1),fullfile(PathName,FileName));
 
 % --------------------------------------------------------------------
-function Rescale_Trees_ClickedCallback(hObject, eventdata, handles)
+function Rescale_Trees_ClickedCallback(~, ~, handles)
 % hObject    handle to Rescale_Trees (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 new_scale = inputdlg('Please enter new scale','Rescale Trees',1,{'[0.4112,0.4112,1.5]'});
-new_scale = str2num(new_scale{1});
+new_scale = str2double(new_scale{1});
 if numel(new_scale)~=3 || isempty(new_scale)
     return
 end
@@ -1021,7 +1003,7 @@ end
 
 
 % --- Executes on button press in make_sorted_files.
-function make_sorted_files_Callback(hObject, eventdata, handles)
+function make_sorted_files_Callback(~, ~, handles)
 % hObject    handle to make_sorted_files (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -1087,7 +1069,7 @@ end
 
 
 % --- Executes on button press in Rotate_ok.
-function Rotate_ok_Callback(hObject, eventdata, handles)
+function Rotate_ok_Callback(hObject, ~, handles)
 % hObject    handle to Rotate_ok (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -1100,13 +1082,16 @@ TreeAdmin_UpdateGUI(handles);
 
 
 % --- Executes on button press in x3d.
-function x3d_Callback(hObject, eventdata, handles)
+function x3d_Callback(~, ~, handles)
 % hObject    handle to x3d (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 trees = handles.admin.all_trees(cat(1,handles.filter.filtered_tree_names{handles.filter.selected_trees,2}));
 
 [tname, path] = uiputfile ('.x3d', 'export to x3d', 'tree.x3d');
+if ~ischar(tname) && tname == 0
+    return
+end
 if ~isempty(strfind(tname,'.x3d'))
     tname = tname(1:end-4);
 end
