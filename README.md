@@ -1,6 +1,6 @@
 # TreeAdmin
 
-TreeAdmin is a small Matlab extension to the [TREES toolbox](www.treestoolbox.org). Its graphical user interface helps to view and categorize morphologies reconstructed with TREES toolbox.
+TreeAdmin is a small Matlab extension to the [TREES toolbox](www.treestoolbox.org). Its graphical user interface helps to view and categorize morphologies reconstructed with TREES toolbox. It is one of the tools used (and should be cited like this) for the paper [Beining M*, Jungenitz T*, Radic T, Deller T, Cuntz H, Jedlicka P, Schwarzacher SW: Adult-born dentate granule cells show a critical period of dendritic reorganization and are distinct from developmentally born cells. Brain Structure and Function 2017, 222(3):1427-1446.](https://link.springer.com/article/10.1007/s00429-016-1285-y)
 
 # Getting started
 
