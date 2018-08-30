@@ -1,6 +1,13 @@
+[![GitHub tag](https://img.shields.io/github/tag/MarcelBeining/TreeAdmin.svg?style=for-the-badge)](https://github.com/MarcelBeining/TreeAdmin/releases)
+![GitHub top language](https://img.shields.io/github/languages/top/MarcelBeining/TreeAdmin.svg?style=for-the-badge)
+[![GitHub](https://img.shields.io/github/license/MarcelBeining/TreeAdmin.svg?style=for-the-badge)](https://github.com/MarcelBeining/TreeAdmin/blob/master/LICENSE)
+[![GitHub contributors](https://img.shields.io/github/contributors/MarcelBeining/TreeAdmin.svg?style=for-the-badge)](https://github.com/MarcelBeining/TreeAdmin/graphs/contributors)
+![GitHub repo size in bytes](https://img.shields.io/github/repo-size/MarcelBeining/TreeAdmin.svg?style=for-the-badge)
+[![GitHub issues](https://img.shields.io/github/issues/MarcelBeining/TreeAdmin.svg?style=for-the-badge)](https://github.com/MarcelBeining/TreeAdmin/issues)
+
 # TreeAdmin
 
-TreeAdmin is a small Matlab extension to the [TREES toolbox](www.treestoolbox.org). Its graphical user interface helps to view and categorize morphologies reconstructed with TREES toolbox. It is one of the tools used (and should be cited like this) for the paper [Beining M*, Jungenitz T*, Radic T, Deller T, Cuntz H, Jedlicka P, Schwarzacher SW: Adult-born dentate granule cells show a critical period of dendritic reorganization and are distinct from developmentally born cells. Brain Structure and Function 2017, 222(3):1427-1446.](https://link.springer.com/article/10.1007/s00429-016-1285-y)
+TreeAdmin is a small Matlab extension to the [TREES toolbox](http://www.treestoolbox.org). Its graphical user interface helps to view and categorize morphologies reconstructed with TREES toolbox. It is one of the tools used (and should be cited like this) for the paper [Beining M*, Jungenitz T*, Radic T, Deller T, Cuntz H, Jedlicka P, Schwarzacher SW: Adult-born dentate granule cells show a critical period of dendritic reorganization and are distinct from developmentally born cells. Brain Structure and Function 2017, 222(3):1427-1446.](https://link.springer.com/article/10.1007/s00429-016-1285-y)
 
 # Getting started
 
